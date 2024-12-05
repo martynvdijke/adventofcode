@@ -1,98 +1,44 @@
-import numpy as np
+import itertools
+
+fileContents = open("input.txt")
+arr = fileContents.read().split("\n")
 
 
-def read_input():
-    output = []
-    with open("input.txt", "r") as file:
-        file_list = file.read()
-        split_lines = file_list.splitlines()
-        for line in split_lines:
-            level = []
-            numbers = line.split()
-            for number in numbers:
-                level.append(int(number))
-            output.append(level)
-    return output
+increasing = [1, 2, 3]
+decreasing = [-1, -2, -3]
 
 
-def part1():
-    test = read_input()
+def is_safe(levels):
+    if levels[0] == levels[1]:
+        return False
+    not_increasing = False
+    not_decreasing = False
+    for i, level in enumerate(levels[1:]):
+        if levels[i] - level not in increasing:
+            # print("not_increasing", levels[i] - level)
+            not_increasing = True
+        if levels[i] - level not in decreasing:
+            # print("not_decreasing", levels[i] - level)
+            not_decreasing = True
+    if not_increasing and not_decreasing:
+        return False
+    else:
+        return True
 
-    safe = 0
-    for level in test:
-        np_array = np.array(level)
-        diff = np.ediff1d(np_array)
-        decrease = (diff < 0).sum()
-        increase = (diff > 0).sum()
-        max_decrease = np.min(diff)
-        max_increase = np.max(diff)
-        if decrease == (len(level) - 1) and max_decrease >= -3:
+
+safe = 0
+for line in arr:
+    levels = line.split(" ")
+    levels = [int(i) for i in levels]
+    if is_safe(levels):
+        safe += 1
+    else:
+        level_subsets = itertools.combinations(levels, len(levels) - 1)
+        found_safe = False
+        for sub in level_subsets:
+            if is_safe(sub):
+                found_safe = True
+        if found_safe:
             safe += 1
-            continue
-        if increase == (len(level) - 1) and max_increase <= 3:
-            safe += 1
-            continue
 
-    print(safe)
-
-
-def part2():
-    test = read_input()
-
-    safe = 0
-    for level in test:
-        np_array = np.array(level)
-        diff = np.ediff1d(np_array)
-        
-        decrease = (diff < 0).sum()
-        increase = (diff > 0).sum()
-        max_decrease = np.min(diff)
-        max_increase = np.max(diff)
-        
-        if decrease == (len(level) - 1) and max_decrease >= -3:
-            safe += 1
-            continue
-        if increase == (len(level) - 1) and max_increase <= 3:
-            safe += 1
-            continue
-        
-        if decrease == (len(level) - 2):
-            safe += decrease_func(level)
-            continue
-
-        if increase == (len(level) - 2):
-            safe += increase_func(level)
-            continue
-
-    print(safe)
-
-
-def increase_func(level):
-    diff = np.ediff1d(np.array(level))
-    for i in range(0, len(level)):
-        temp2 = level.copy()
-        temp2.pop(i)
-        np_array = np.array(temp2)
-        diff = np.ediff1d(np_array)
-        max_increase = np.max(diff)
-        increase = (diff > 0).sum()
-        if max_increase <= 3 and increase == (len(level) - 2):
-            return 1
-    return 0
-
-
-def decrease_func(level):
-    diff = np.ediff1d(np.array(level))
-    for i in range(0, len(level)):
-        temp2 = level.copy()
-        temp2.pop(i)
-        np_array = np.array(temp2)
-        diff = np.ediff1d(np_array)
-        max_decrease = np.min(diff)
-        decrease = (diff < 0).sum()
-        if max_decrease >= -3 and decrease == (len(level) - 2):
-            return 1
-    return 0
-
-part1()
-part2()
+print(safe)
