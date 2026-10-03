@@ -1,1 +1,6 @@
 *.txt
+openspec/
+.opencode/
+
+# Zensical build output
+site/
